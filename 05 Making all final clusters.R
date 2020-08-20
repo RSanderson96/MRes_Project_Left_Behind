@@ -1,30 +1,12 @@
-Local_Authorities = readOGR(dsn = ('C:/Users/b9054751/OneDrive - Newcastle University/PhD/new_project2'),layer="LA_England")
-Regions = readOGR(dsn = ('C:/Users/b9054751/OneDrive - Newcastle University/PhD/new_project2'),layer="Regions__December_2019__Boundaries_EN_BUC")
-MSOA = readOGR(dsn = ('C:/Users/b9054751/OneDrive - Newcastle University/PhD/new_project3'),layer="Middle_Layer_Super_Output_Areas__December_2011__Boundaries")
-MSOA = subset(MSOA,(str_detect(msoa11cd, 'E')))
-
-
-#LA Clustering - final decision, 6 clusters Kmeans
-
-#HC6 <- eclust(LA_Z, "hclust", k = 6,metric = "euclidean",
-#              method = "complete", graph = FALSE) #Clustering
-#HCClusters6 <-as.matrix(HC6$cluster) #Extract sizes
-#HCClusters6 <- as.data.frame(HCClusters6)
-#HCSizes6 = data.frame(table(HCClusters6)) #not
-#
-
-#LA Clustering - final decision, 6 clusters Kmeans
-
+#First clustering - k means with 7 clusters
 HC6 <-kmeans(LA_Z,7,nstart = 25, iter.max = 1000,) #Clustering
 HCClusters6 <-as.matrix(HC6$cluster) #Extract sizes
 HCClusters6 <- as.data.frame(HCClusters6)
-HCSizes6 = data.frame(table(HCClusters6)) #not
+HCSizes6 = data.frame(table(HCClusters6)) 
 
+#Making the clusterplot
 Final_Clusters = fviz_cluster(HC6, data = LA_Z, geom = "point", ellipse = F, pointsize = 3,
                               ggtheme = theme_classic())+scale_colour_brewer(palette = "Paired")
-
-Final_Clusters
-
 
 ################Map for K6
 LA_Classification <-as.data.frame(cbind((LA_Inverse$LA_Code), HCClusters6))
@@ -47,14 +29,13 @@ Map_Class_LA$Classification[Map_Class_LA$Classification == "7"] <- "G) Neglected
 LA_Class<-merge (x = Local_Authorities, y = Map_Class_LA, by.x = c("LA_Engla_3"), by.y = c("LA_Code"))
 LA_Bub_7 = tm_shape(LA_Class) + tm_bubbles(size = 0.1, col = "Classification", palette = "Paired", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)+
   tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+ tm_layout(main.title = "Local Authority Clustering",main.title.position = "center")+tm_layout(legend.text.size = 0.7) 
-
-LA_Bub_7
+#LA_Bub_7 - final LA Map
 
 LA_Full_Classification  <- LA_Classification %>% left_join(Inv, by="LA_Code", all = T)
 LA_Full_Classification = LA_Full_Classification  %>% select (-"LA_Code")
 LA_Full_Classification$Classification = as.numeric(as.character(LA_Full_Classification$Classification))
 
-
+#Making the heatmap
 means_by_cluster <- data.frame(matrix(ncol = 43, nrow = 0))
 x <- colnames(LA_Full_Classification)
 colnames(means_by_cluster) <- x
@@ -149,38 +130,33 @@ LA_Class7<-merge (x = Local_Authorities, y = Classification7, by.x = c("LA_Engla
 TM1 = tm_shape(LA_Class1) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
 TM2 = TM1 +tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)
 LA_Map1 = TM2+tm_layout(legend.text.size = 0.9)
-LA_Map1
 
 TM1 = tm_shape(LA_Class2) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
 TM2 = TM1 +tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)
 LA_Map2 = TM2+tm_layout(legend.text.size = 0.9)
-LA_Map2
 
 TM1 = tm_shape(LA_Class3) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
 TM2 = TM1 +tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)
 LA_Map3 = TM2+tm_layout(legend.text.size = 0.9)
-LA_Map3
+
 
 TM1 = tm_shape(LA_Class4) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
 TM2 = TM1 +tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)
 LA_Map4 = TM2+tm_layout(legend.text.size = 0.9)
-LA_Map4
 
 TM1 = tm_shape(LA_Class5) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
 TM2 = TM1 +tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)
 LA_Map5 = TM2+tm_layout(legend.text.size = 0.9)
-LA_Map5
 
 TM1 = tm_shape(LA_Class6) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
 TM2 = TM1 +tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)
 LA_Map6 = TM2+tm_layout(legend.text.size = 0.9)
-LA_Map6
 
 TM1 = tm_shape(LA_Class7) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
 TM2 = TM1 +tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)
 LA_Map7 = TM2+tm_layout(legend.text.size = 0.9)
-LA_Map7
 
+#Testing making a radial plot
 Radial = t(LA_z_clus)
 Radial = data.frame(Radial)
 Radial[8,]<-c(0)
@@ -190,7 +166,7 @@ radial.plot(Radial[c(7,8),],labels = colnames(Radial),
             line.col = "blue", radlab = TRUE, rp.type="p", show.grid.labels = 3, main = "Cluster 7",
             mar =c(4,3,7,3),  radial.lim = c(-2,2))
 
-#MSOA Clustering - 6 clusters Kmeans - also need to show populations comparison (house/popn/la) for this clustering only
+#MSOA Clustering - 7 clusters Kmeans - allows comparison
 
 KMZ7<-kmeans(MSOA_Z,7,nstart = 50, iter.max = 1000,) #Clustering
 KMClusters7 <-as.matrix(KMZ7$cluster) #identify cluster sizes
@@ -215,7 +191,6 @@ Map = tm_shape(MSOA_7_Class) + tm_bubbles(size = 0.1, col = "Classification",
                                         border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
 MSOA_Bub7 = Map+ tm_shape(Local_Authorities)+tm_borders("black", lwd = .7,)+ tm_layout(main.title = "MSOA Clustering",main.title.position = "center")
 
-MSOA_Bub7
 #MSOA Clustering - 11 clusters Kmeans
 
 ##############Making 11 clusters
@@ -227,16 +202,16 @@ KMClusters11 <- as.data.frame(KMClusters11)
 Sizes11 = data.frame(table(KMClusters11)) #notice sample size for cluster size
 Sizes11 = Sizes11 %>% dplyr::rename(Cluster = KMClusters11, Count_11 = Freq)
 
+#Cluster plot for 11 MSOA clusters
 Final_Clusters = fviz_cluster(KMZ11, data = MSOA_Z, geom = "point", ellipse = F, pointsize = 3,
                               ggtheme = theme_classic())+scale_colour_brewer(palette = "Paired")
 
-Final_Clusters
+
 
 
 
 MSOA_Classification11 <-as.data.frame(cbind(as.character(MSOA_Inv$MSOA_Code), KMClusters11))
 names(MSOA_Classification11)<-c("MSOA_Code", "Classification")   
-#write.csv(MSOA_Classification11, "C:/Users/b9054751/OneDrive - Newcastle University/PhD/new_project4/data/MSOA_Classification_File2.csv")
 MSOA_Classification11 = MSOA_Classification_File2[,2:3]
 MSOA_Classification11_Name <-MSOA_Classification11 %>% left_join(MSOA_Dataset[,c(1,2)], by="MSOA_Code", all = T)
 
@@ -271,8 +246,9 @@ Map = tm_shape(MSOA_11_Class) + tm_bubbles(size = 0.1, col = "Classification",
                                           border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
 Bub11 = Map+ tm_shape(Local_Authorities)+tm_borders("black", lwd = .7,)+ tm_layout(main.title = "MSOA Clustering",main.title.position = "center")
 
-Bub11
+#Bub11 - map of all 11 clusters
 
+#Making the heatmap for MSOA data
 means_by_cluster <- data.frame(matrix(ncol = 25, nrow = 0))
 x <- colnames(MSOA_Full_Classification11)
 colnames(means_by_cluster) <- x
@@ -316,60 +292,6 @@ row.names(z_clus_class)<- c("Secure_Deposit_Households", "Benefits_Claimants", "
                             "Average_Internet_Speed", "Average_Household_Income", "Percentage_Smokers", "Under_5_Child_Development",
                             "GCSE_Education", "Free_School_Meals_Proportion")
 
-##############Individual Maps
-
-MSOA_Class1 = subset(MSOA_11_Class,(Classification == "2b) Fringe Beneficiaries"))
-MSOA_Class2<-subset(MSOA_11_Class,(Classification == "2a) Connected Towns"))
-MSOA_Class3<-subset(MSOA_11_Class,(Classification == "2c) Vibrant Inner City"))
-MSOA_Class4<-subset(MSOA_11_Class,(Classification == "2d) Prosperous Suburbanites"))
-MSOA_Class5<-subset(MSOA_11_Class,(Classification == "1a) Rural Isolation"))
-MSOA_Class6<-subset(MSOA_11_Class,(Classification == "3a) Inner City Deptivation"))
-MSOA_Class7<-subset(MSOA_11_Class,(Classification == "4a) Middling Inner City"))
-MSOA_Class8<-subset(MSOA_11_Class,(Classification == "4c) Modest Urban Outskirts"))
-MSOA_Class9<-subset(MSOA_11_Class,(Classification == "4b) Flexible Inner City"))
-MSOA_Class10<-subset(MSOA_11_Class,(Classification == "3b) Forgotten Urban Fringes"))
-MSOA_Class11<-subset(MSOA_11_Class,(Classification == "1b) Remote Towns"))
-
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class1) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map1 = TM1
-MSOA_Map1
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class2) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map2 = TM1
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class3) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map3 = TM1
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class4) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map4 = TM1
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class5) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map5 = TM1
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class6) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map6 = TM1
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class7) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map7 = TM1
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class8) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map8 = TM1
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class9) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map9 = TM1
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class10) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map10 = TM1
-
-
-TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Class11) + tm_bubbles(size = 0.1, col = "Classification", palette = "Set1", style = "quantile",legend.size.show = FALSE, title.col = "Cluster", border.col = "black", border.lwd = 0.1, border.alpha = 0.1)
-MSOA_Map11 = TM1
-
-MSOA_Map11
-
-tmap_arrange(MSOA_Map1,MSOA_Map2,MSOA_Map3,MSOA_Map4,MSOA_Map5,MSOA_Map6,MSOA_Map7,
-             MSOA_Map8,MSOA_Map9,MSOA_Map10,MSOA_Map11, widths = c(.25, .25))
-
 ###Group Maps
 MSOA_Group1<-subset(MSOA_11_Class,(Classification == "1b) Remote Towns" | Classification == "1a) Rural Isolation"))
 TM1 = tm_shape(Regions)+tm_borders("black", lwd = .9,)+tm_text("rgn19nm", size = 0.6)+tm_shape(MSOA_Group1) + 
@@ -397,7 +319,7 @@ MSOA_MapGroup4 = TM1
 MSOA_MapGroup1
 
 
-
+#Making radial plots
 
 Radial2 = t(z_clus)
 Radial2 = data.frame(Radial2)
