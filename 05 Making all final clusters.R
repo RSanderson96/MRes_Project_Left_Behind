@@ -1,3 +1,80 @@
+#Assessing number of clusters
+LA_Z = as.matrix(LA_Z)
+intern <- clValid(LA_Z, 2:10, clMethods=c("kmeans", "pam", "hierarchical"), validation="internal", metric = "euclidean")
+summary(intern)
+op <- par(no.readonly=TRUE)
+par(mfrow=c(2,2),mar=c(4,4,3,1))
+plot(intern, legend=FALSE)
+plot(nClusters(intern),measures(intern,"Dunn")[,,1],type="n",axes=F, xlab="",ylab="")
+legend("center", clusterMethods(intern), col=1:9, lty=1:9, pch=paste(1:9))
+par(op)
+
+stab <- clValid(LA_Z, 2:10, clMethods=c("kmeans", "pam", "hierarchical"),validation="stability")
+summary(stab)
+par(mfrow=c(2,2),mar=c(4,4,3,1))
+plot(stab, measure=c("APN","AD","ADM"),legend=FALSE)
+plot(nClusters(stab),measures(stab,"APN")[,,1],type="n",axes=F,xlab="",ylab="")
+legend("center", clusterMethods(stab), col=1:9, lty=1:9, pch=paste(1:9))
+par(op)
+
+x = 11
+y = c(2:x)
+km_within = vector()
+km_between = vector()
+for(i in y){
+  km = kmeans(LA_Z, i)
+  KMClusters = km$cluster
+  km_stats <- cluster.stats(dist(LA_Z), KMClusters)
+  km_within[i] = km_stats[["average.within"]]
+  km_between[i] = km_stats[["average.between"]]
+}
+x = 11
+y = c(2:x)
+PAM_within = vector()
+PAM_between = vector()
+for(i in y){
+  pm = pam(LA_Z, i)
+  PMClusters =  pm[["clustering"]]
+  pm_stats <- cluster.stats(dist(LA_Z), PMClusters)
+  PAM_within[i] = pm_stats[["average.within"]]
+  PAM_between[i] = pm_stats[["average.between"]]
+}
+x = 11
+y = c(2:x)
+HC_within = vector()
+HC_between = vector()
+for(i in y){
+  HC = eclust(LA_Z, "hclust", k = i,metric = "euclidean",
+              hc_method = "ward.D", graph = FALSE)
+  HCClusters =  HC[["cluster"]]
+  HC_stats <- cluster.stats(dist(LA_Z), HCClusters)
+  HC_within[i] = HC_stats[["average.within"]]
+  HC_between[i] = HC_stats[["average.between"]]
+}
+Within = data.frame("KMeans" =km_within, "PAM" = PAM_within, "Hierarchical" = HC_within)
+Within = Within[-c(1),]
+Within$Cluster = c(2:11)
+Between = data.frame("KMeans" =km_between, "PAM" = PAM_between, "Hierarchical" = HC_between)
+Between = Between[-c(1),]
+Between$Cluster = c(2:11)
+WB = rbind(Within, Between )
+Within <- Within %>% gather(key = "Method", value = value, -(Cluster))
+names(Within)[names(Within) == "value"] <- "Within"
+Between <- Between %>% gather(key = "Method", value = value, -(Cluster))
+names(Between)[names(Between) == "value"] <- "Between"
+WB  <- Within %>% left_join(Between, by=c("Cluster", "Method"), all = T)
+
+WBP = ggplot(WB, aes(x = Cluster, y = value))
+WBP2 = WBP+geom_point(aes(x = Cluster, y = Within, colour = Method, shape = "Within Clusters")) 
+WBP3 = WBP2+geom_point(aes(x = Cluster, y = Between, colour = Method, shape = "Between Clusters"))
+WBP4 = WBP3 +scale_shape_manual(values=c(17,15))+scale_size_manual(10)
+WBP5 = WBP4 +geom_line(aes(x = Cluster, y = Within, color =Method))
+WBP6 = WBP5 +geom_line(aes(x = Cluster, y = Between, colour =Method))
+WBP7 = WBP6+ggtitle("Cluster Model Comparison") + xlab("Number of Clusters") + ylab("Average Distance") + 
+  scale_x_discrete(name = "Number of Clusters", limits = c(2:12))
+
+
+
 #First clustering - k means with 7 clusters
 HC6 <-kmeans(LA_Z,7,nstart = 25, iter.max = 1000,) #Clustering
 HCClusters6 <-as.matrix(HC6$cluster) #Extract sizes
@@ -194,6 +271,26 @@ MSOA_Bub7 = Map+ tm_shape(Local_Authorities)+tm_borders("black", lwd = .7,)+ tm_
 #MSOA Clustering - 11 clusters Kmeans
 
 ##############Making 11 clusters
+MSOA_Z = as.matrix(MSOA_Z)
+intern <- clValid(MSOA_Z, 2:30, clMethods=c("kmeans"), validation="internal", metric = "euclidean")
+y
+summary(intern)
+op <- par(no.readonly=TRUE)
+par(mfrow=c(2,2),mar=c(4,4,3,1))
+plot(intern, legend=FALSE)
+plot(nClusters(intern),measures(intern,"Dunn")[,,1],type="n",axes=F, xlab="",ylab="")
+legend("center", clusterMethods(intern), col=1:9, lty=1:9, pch=paste(1:9))
+par(op)
+
+
+stab <- clValid(MSOA_Z, 2:30, clMethods=c("kmeans"),validation="stability")
+y
+summary(stab)
+par(mfrow=c(2,2),mar=c(4,4,3,1))
+plot(stab, measure=c("APN","AD","ADM"),legend=FALSE)
+plot(nClusters(stab),measures(stab,"APN")[,,1],type="n",axes=F,xlab="",ylab="")
+legend("center", clusterMethods(stab), col=1:9, lty=1:9, pch=paste(1:9))
+par(op)
 
 
 KMZ11 <-kmeans(MSOA_Z,11,nstart = 25, iter.max = 1000,) #Clustering
