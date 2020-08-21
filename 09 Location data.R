@@ -33,13 +33,6 @@ MSOA_Lookup$LA_Name[MSOA_Lookup$LA_Name == "Weymouth and Portland"] <- "Dorset"
 
 #How many LA clusters are in each region? 
 LA_Class_Region  <-merge (x = Map_Class_LA, y = LAD_to_Region, by = c("LA_Code"))
-#LA_Class_Region$Classification[LA_Class_Region$Classification == "1"] <- "Cluster1"
-#LA_Class_Region$Classification[LA_Class_Region$Classification == "2"] <- "Cluster2"
-#LA_Class_Region$Classification[LA_Class_Region$Classification == "3"] <- "Cluster3"
-#LA_Class_Region$Classification[LA_Class_Region$Classification == "4"] <- "Cluster4"
-#LA_Class_Region$Classification[LA_Class_Region$Classification == "5"] <- "Cluster5"
-#LA_Class_Region$Classification[LA_Class_Region$Classification == "6"] <- "Cluster6"
-#LA_Class_Region$Classification[LA_Class_Region$Classification == "7"] <- "Cluster7" 
 PerRegions = unique(LA_Class_Region$Reg_Name)
 
 
